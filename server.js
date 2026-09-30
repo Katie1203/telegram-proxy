@@ -11,6 +11,10 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const PROXY_SECRET = process.env.PROXY_SECRET || "";
 
+app.get("/", (req, res) => {
+  res.send("Server đang hoạt động");
+});
+
 app.get("/health", (req, res) => {
   res.json({
     ok: true,
@@ -81,6 +85,6 @@ app.post("/api/telegram/send", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server đang chạy tại cổng ${PORT}`);
 });
