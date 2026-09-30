@@ -88,3 +88,43 @@ app.post("/api/telegram/send", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server đang chạy tại cổng ${PORT}`);
 });
+const token = process.env.TELEGRAM_BOT_TOKEN;
+let offset = 0;
+
+async function pollTelegram() {
+  try {
+    const response = await fetch(
+      `https://api.telegram.org/bot${token}/getUpdates?timeout=25&offset=${offset}`
+    );
+    const data = await response.json();
+
+    if (!data.ok) {
+      console.error("Telegram error:", data);
+      return;
+    }
+
+    for (const update of data.result) {
+      offset = update.update_id + 1;
+
+      const message = update.message;
+      if (!message?.text) continue;
+
+      console.log("Telegram message:", message.text);
+
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: message.chat.id,
+          text: `Đã nhận: ${message.text}`
+        })
+      });
+    }
+  } catch (error) {
+    console.error("Polling error:", error.message);
+  }
+
+  pollTelegram();
+}
+
+pollTelegram();
